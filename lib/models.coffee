@@ -1,2 +1,2 @@
-Meteor.startup ->
-  console.log "models starting up"
+@Resource = new Meteor.Collection "Resource"
+@Disaster = new Meteor.Collection "Disaster"
