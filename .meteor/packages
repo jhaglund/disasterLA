@@ -9,9 +9,9 @@ preserve-inputs
 coffeescript
 jquery
 bootstrap
-less
 accounts-base
 accounts-ui
 accounts-twitter
 d3
 handlebars
+stylus
