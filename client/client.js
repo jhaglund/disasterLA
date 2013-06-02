@@ -23,8 +23,12 @@ Meteor.startup(function(){
   
   $('#geocode-resource').click(function(){
     //build the address (hard coded city), and the get request data
+    //FIXME res is the document that will be saved to mongodb, so probs needs some schema work
+    //i've read that the keys should be kept short, so maybe find/replace those at some point?
     var res = {'address':''+ $('#resource-address')[0].value+ ' Los Angeles, CA'
-                , 'resource':''+ $('#resource-name')[0].value}
+                , 'resource':''+ $('#resource-name')[0].value
+                , 'user':Meteor.user()
+                }
       , data={'address':res.address, 'sensor':'false'};
     console.log('data',data);
     
