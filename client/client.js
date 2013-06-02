@@ -121,6 +121,8 @@ Meteor.startup(function(){
         return;
       }
       //successfully looked up the address with google, put it on the map
+      //TODO uncomment below to store google's formatted_address instead of user input
+      //doc.address = data.results[0].formatted_address
       doc.lat = data.results[0].geometry.location.lat;
       doc.lng = data.results[0].geometry.location.lng;
       latlng = new L.LatLng(doc.lat, doc.lng);
