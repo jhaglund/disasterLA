@@ -10,14 +10,32 @@ Meteor.startup(function(){
     ).addTo(map)
   };//end Template.map.rendered
 
+  //utility function to mark the map with resources or concerns
+  var markit=function(res_o_con, doc, popupcontent){
+    //default the popup content to the resource or concern, can be overridden tho
+    popupcontent = popupcontent || '<b>'+res_o_con+':</b> '+doc[res_o_con];
+    var latlng = new L.LatLng(doc.lat, doc.lng)
+      , icobase='/packages/leaflet/lib/images/'
+      , myIcon = L.icon({
+          iconUrl: icobase+'marker-icon-'+res_o_con+'.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 40],
+          popupAnchor: [2, -25],
+          shadowUrl: icobase+'marker-shadow.png',
+          shadowSize: [41, 41],
+          shadowAnchor: [12, 40]
+        })
+      , marker = L.marker(latlng, {'title': doc[res_o_con], 'icon':myIcon});
+    marker.addTo(map)
+    marker.bindPopup(popupcontent)
+    return marker;
+  };
+  
   //initialize the map with resources, continue watching for changes
   resources = Resource.find().observe(
     {
       added:function(doc){
-        var latlng = new L.LatLng(doc.lat, doc.lng)
-          , marker = L.marker(latlng, {title:doc.resource});
-        marker.addTo(map)
-        marker.bindPopup('<b>resource:</b> '+doc.resource)
+        markit('resource', doc);
         console.log('added resource', doc);
       }
       , changed:function(doc){
@@ -35,10 +53,7 @@ Meteor.startup(function(){
   concerns = Disaster.find().observe(
     {
       added:function(doc){
-        var latlng = new L.LatLng(doc.lat, doc.lng)
-          , marker = L.marker(latlng, {title:doc.concern});
-        marker.addTo(map)
-        marker.bindPopup('<b>concern:</b> '+doc.concern)
+        markit('concern', doc);
         console.log('added concern', doc);
       }
       , changed:function(doc){
@@ -96,9 +111,8 @@ Meteor.startup(function(){
       
       //FIXME -- client injection (doc[res_o_con] is unsafe user input)
       popupcontent='<b>'+res_o_con+':</b> '+doc[res_o_con]+'<div id="'+res_o_con+'-save-status"><div class="btn btn-info" id="'+res_o_con+'-save">Save</div></div>';
-      marker = L.marker(latlng, markeropts)
-      marker.addTo(map)
-      marker.bindPopup(popupcontent).openPopup();
+      marker = markit(res_o_con, doc, popupcontent);
+      marker.openPopup();
       
       //map now shows the resource on the map, with a 'save' button
       //handle the save click by writing it to the Resource collection
