@@ -1,5 +1,5 @@
 Meteor.startup(function(){
-  var map, resources, concerns;
+  var map;
   Template.map.rendered = function(){
     map = L.map('map').setView([34.073546, -118.236773], 10)
     L.tileLayer('http://{s}.tile.cloudmade.com/'+ leaflet + '/997/256/{z}/{x}/{y}.png'
@@ -12,7 +12,7 @@ Meteor.startup(function(){
 
   //utility function to mark the map with resources or concerns
   var markit=function(res_o_con, doc, popupcontent){
-    //default the popup content to the resource or concern, can be overridden tho
+    //default the popup content to the resource or concern, can be overridden tho, like the 'save' button
     popupcontent = popupcontent || '<b>'+res_o_con+':</b> '+doc[res_o_con];
     var latlng = new L.LatLng(doc.lat, doc.lng)
       , icobase='/packages/leaflet/lib/images/'
@@ -32,7 +32,7 @@ Meteor.startup(function(){
   };
   
   //initialize the map with resources, continue watching for changes
-  resources = Resource.find().observe(
+  Resource.find().observe(
     {
       added:function(doc){
         markit('resource', doc);
@@ -50,7 +50,7 @@ Meteor.startup(function(){
   );
 
   //initialize the map with resources, continue watching for changes
-  concerns = Disaster.find().observe(
+  Disaster.find().observe(
     {
       added:function(doc){
         markit('concern', doc);
@@ -78,11 +78,14 @@ Meteor.startup(function(){
     $('#resource-input').hide();
     $('#concern-input').show();
   });
-  var addpopup = function( content, latlon){
-  }
   
-  //this function generically handles resources or concerns
-  map_resource_concern = function( res_o_con, address, thing){
+  /* map_resource_concern() generically handles resources or concerns
+      res_o_con: either 'resource' or 'concern'
+      address: address text FIXME unsanitized
+      thing: this is the resource or concern text FIXME unsanitized
+  */
+  var map_resource_concern = function( res_o_con, address, thing)
+  {
     //build the address (hard coded city), and the get request data
     //FIXME doc is the document that will be saved to mongodb, so probs needs some schema work
     //i've read that the keys should be kept short, so maybe find/replace those at some point?
@@ -90,6 +93,7 @@ Meteor.startup(function(){
                 , 'user':Meteor.user()
                 }
       , data={'address':doc.address, 'sensor':'false'};
+    //FIXME thing is unsanitized
     doc[res_o_con] = thing;
     console.log('data',data);
     
@@ -109,7 +113,6 @@ Meteor.startup(function(){
       console.log('latlng', latlng);
       map.setView(latlng, 15);
       
-      //FIXME -- client injection (doc[res_o_con] is unsafe user input)
       popupcontent='<b>'+res_o_con+':</b> '+doc[res_o_con]+'<div id="'+res_o_con+'-save-status"><div class="btn btn-info" id="'+res_o_con+'-save">Save</div></div>';
       marker = markit(res_o_con, doc, popupcontent);
       marker.openPopup();
