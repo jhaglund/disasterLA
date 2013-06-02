@@ -1,6 +1,7 @@
 Meteor.startup(function(){
   var map;
-  Template.map.rendered = function(){
+  Template.map.rendered = function()
+  {
     map = L.map('map').setView([34.073546, -118.236773], 10)
     L.tileLayer('http://{s}.tile.cloudmade.com/'+ leaflet + '/997/256/{z}/{x}/{y}.png'
       , {attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, '
@@ -9,11 +10,22 @@ Meteor.startup(function(){
         , maxZoom: 18}
     ).addTo(map)
   };//end Template.map.rendered
-
+  
+  var popupformat = function(res_o_con, doc)
+  {
+    return '<div class="'+res_o_con+'"><b>'+res_o_con+':</b>'
+      +'<span>'+doc[res_o_con]+'</span>'
+      +'<div>Address: '+doc.address+'</div>'
+      +'<div>Added by: '+doc.user.profile.name+'</div>'
+      +'</div>'
+      ;
+  }
+  
   //utility function to mark the map with resources or concerns
-  var markit=function(res_o_con, doc, popupcontent){
+  var markit=function(res_o_con, doc, popupcontent)
+  {
     //default the popup content to the resource or concern, can be overridden tho, like the 'save' button
-    popupcontent = popupcontent || '<b>'+res_o_con+':</b> '+doc[res_o_con];
+    popupcontent = popupcontent || popupformat(res_o_con, doc);
     var latlng = new L.LatLng(doc.lat, doc.lng)
       , icobase='/packages/leaflet/lib/images/'
       , myIcon = L.icon({
@@ -70,11 +82,13 @@ Meteor.startup(function(){
   
   //click handlers for add add-a-resource or add-a-concern
   //hide the other input, show the input whose button was clicked
-  $('#add-a-resource').click(function(){
+  $('#add-a-resource').click(function()
+  {
     $('#concern-input').hide();
     $('#resource-input').show();
   });
-  $('#add-a-concern').click(function(){
+  $('#add-a-concern').click(function()
+  {
     $('#resource-input').hide();
     $('#concern-input').show();
   });
@@ -89,10 +103,10 @@ Meteor.startup(function(){
     //build the address (hard coded city), and the get request data
     //FIXME doc is the document that will be saved to mongodb, so probs needs some schema work
     //i've read that the keys should be kept short, so maybe find/replace those at some point?
-    var doc = {'address':''+ address+ ' Los Angeles, CA'
+    var doc = {'address':''+ address
                 , 'user':Meteor.user()
                 }
-      , data={'address':doc.address, 'sensor':'false'};
+      , data={'address':doc.address+' Los Angeles, CA', 'sensor':'false'};
     //FIXME thing is unsanitized
     doc[res_o_con] = thing;
     console.log('data',data);
@@ -113,13 +127,16 @@ Meteor.startup(function(){
       console.log('latlng', latlng);
       map.setView(latlng, 15);
       
-      popupcontent='<b>'+res_o_con+':</b> '+doc[res_o_con]+'<div id="'+res_o_con+'-save-status"><div class="btn btn-info" id="'+res_o_con+'-save">Save</div></div>';
+      popupcontent = popupformat(res_o_con, doc)
+                +'<div id="'+res_o_con+'-save-status">'
+                +'<div class="btn btn-info" id="'+res_o_con+'-save">Save</div></div>';
       marker = markit(res_o_con, doc, popupcontent);
       marker.openPopup();
       
       //map now shows the resource on the map, with a 'save' button
       //handle the save click by writing it to the Resource collection
-      $('#'+res_o_con+'-save').click(function(){
+      $('#'+res_o_con+'-save').click(function()
+      {
         //push the doc to the server
         if('resource' == res_o_con){
           Resource.insert( doc, function(e,id){ //callback
@@ -130,12 +147,14 @@ Meteor.startup(function(){
             console.log('inserted concern', e, id); 
           });
         }
+        //tell the user it's saved and reset the form
         $('#'+res_o_con+'-save-status').html('Saved!');
+        $('input.resetable').val('');
       });
     }, 'json');
   }
 
-
+  //handle the clicks of the "Add a..." buttons
   $('#geocode-resource').click(function(){
     map_resource_concern('resource', $('#resource-address')[0].value, $('#resource-name')[0].value);
   });//end geocode-resource click handler
