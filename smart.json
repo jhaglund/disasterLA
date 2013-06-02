@@ -4,6 +4,8 @@
     "branch": "master"
   },
   "packages": {
-    "roles": {}
+    "roles": {},
+    "router": {},
+    "leaflet": {}
   }
 }

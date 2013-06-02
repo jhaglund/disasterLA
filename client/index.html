@@ -1,9 +1,25 @@
-<head></head>
+<head>
+  <title> Disaster LA</title>
+
+</head>
 
 <body>
   <h1>DisasterLA</h1>
-  <p> More Stuff</p>
+
+  {{loginButtons}}
+  {{> map}}
+
 
 
 
 </body>
+
+
+<template name="map">
+  <div class="map">
+    {{#constant}}<div id="map"></map>{{/constant}}   
+  </div>
+
+  <div class="btn btn-primary" id="#add-a-resource">Add a Resource</div>
+  <div class="btn btn-danger" id="#add-a-concern">Add a Concern</div>
+</template>
