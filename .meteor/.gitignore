@@ -1,3 +1,4 @@
 local
 meteorite
 creds.coffee
+.DS_store
